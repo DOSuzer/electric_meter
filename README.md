@@ -62,16 +62,16 @@
    python manage.py create_meters
    python manage.py create_data   
    ```
-6. Запуск сервера
+6. Запуск сервера:
    ```
    python manage.py runserver 
    ```
-7. Запуск Redis в Docker контейнере
+7. Запуск Redis в Docker контейнере:
    ```
    docker run -d -p 6379:6379 redis
    ```
 9. Запустить при необходимости [electric_endpoint](https://github.com/DOSuzer/electric_endpoint).
-10. Запуск Celery
+10. Запуск Celery:
     ```
     celery -A electric_meter worker --loglevel=INFO -P gevent   - Windows
     celery -A electric_meter worker --loglevel=INFO             - Linux
