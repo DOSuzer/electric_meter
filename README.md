@@ -71,8 +71,8 @@
    ```
 9. Запустить при необходимости [electric_endpoint](https://github.com/DOSuzer/electric_endpoint).
 10. Запуск Celery
-   ```
-   celery -A electric_meter worker --loglevel=INFO -P gevent   - Windows
-   celery -A electric_meter worker --loglevel=INFO             - Linux
-   celery -A electric_meter beat --loglevel=INFO
-   ```
+    ```
+    celery -A electric_meter worker --loglevel=INFO -P gevent   - Windows
+    celery -A electric_meter worker --loglevel=INFO             - Linux
+    celery -A electric_meter beat --loglevel=INFO
+    ```
