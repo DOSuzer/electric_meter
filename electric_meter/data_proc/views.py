@@ -1,6 +1,7 @@
 import datetime
 import requests
 
+from django.conf import settings
 from django.db.models import Avg, Max, Min
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -14,6 +15,7 @@ from .serializers import DataSerializer, MeterSerializer
 
 
 class MeterViewSet(viewsets.ModelViewSet):
+    '''Вьюсет получения данных, создания и удаления счетчиков.'''
     http_method_names = ['get', 'post', 'delete']
     queryset = ElectricMeter.objects.all()
     serializer_class = MeterSerializer
@@ -22,23 +24,28 @@ class MeterViewSet(viewsets.ModelViewSet):
             methods=['get', ],
             url_path=r'data')
     def meter_data(self, request, pk):
+        '''Получение данных с счетчика.'''
         meter = get_object_or_404(ElectricMeter, pk=self.kwargs.get('pk'))
-#        response = requests.get(
-#            'http://{}:{}'.format(meter.address, meter.port)
-#        )
-        response = requests.get(
-            'http://{}:8001/{}'.format(meter.address, meter.port)
-        )
-        data = response.json()
-        serializer = DataSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        if settings.DEBUG:
+            path = 'http://{}:8001/{}'.format(meter.address, meter.port)
+        else:
+            path = 'http://{}:{}'.format(meter.address, meter.port)
+        try:
+            response = requests.get(path)
+        except Exception as e:
+            return JsonResponse({'error': 'Не удаслоь получить данные!',
+                                 'detail': str(e)})
+        else:
+            serializer = DataSerializer(data=response.json())
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True,
             methods=['get', ],
             url_path=r'stats')
     def meter_stats(self, request, pk):
+        '''Получение статистики по показаниям счетчика.'''
         meter_id = self.kwargs.get('pk')
         start_date = make_aware(datetime.datetime.strptime(
             request.data.get('start_date'), "%d-%m-%Y"
@@ -54,7 +61,6 @@ class MeterViewSet(viewsets.ModelViewSet):
                        avg_consumption=Avg('consumption'),
                        total_consumption=Max('consumption')-Min('consumption'))
         )
-        print(meter_data)
         return JsonResponse(
             {'средний ток': meter_data['avg_current'],
              'среднее потребление': meter_data['avg_consumption'],

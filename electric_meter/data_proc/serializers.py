@@ -4,6 +4,7 @@ from .models import ElectricMeter, MeterData
 
 
 class DataSerializer(serializers.ModelSerializer):
+    '''Сериализатор показаний с счетчика.'''
     id = serializers.PrimaryKeyRelatedField(
         source='meter',
         queryset=ElectricMeter.objects.all()
@@ -32,6 +33,7 @@ class DataSerializer(serializers.ModelSerializer):
 
 
 class MeterSerializer(serializers.ModelSerializer):
+    '''Сериализатор счетчика.'''
     class Meta:
         fields = ('meter_id', 'address', 'port')
         model = ElectricMeter

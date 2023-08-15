@@ -38,4 +38,4 @@ class MeterData(models.Model):
         verbose_name_plural = 'Показания счетчиков'
 
     def __str__(self):
-        return self.meter.meter_id + str(self.consumption)
+        return f'{self.meter.meter_id}: {self.consumption}'

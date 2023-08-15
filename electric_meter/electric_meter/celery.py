@@ -13,6 +13,7 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
 
 
+# задача по сбору показаний с счетчиков
 app.conf.beat_schedule = {
     'every': {
         'task': 'data_proc.tasks.get_meter_data',

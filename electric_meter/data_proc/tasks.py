@@ -1,5 +1,6 @@
 import requests
 
+from django.conf import settings
 from electric_meter.celery import app
 from .models import ElectricMeter
 from .serializers import DataSerializer
@@ -7,15 +8,18 @@ from .serializers import DataSerializer
 
 @app.task
 def get_meter_data():
+    '''Фоновая задача собирающая данные с счетчиков.'''
     meters = ElectricMeter.objects.all()
     for meter in meters:
-#        response = requests.get(
-#            'http://{}:{}'.format(meter.address, meter.port)
-#        )
-        response = requests.get(
-            'http://{}:8001/{}'.format(meter.address, meter.port)
-        )
-        data = response.json()
-        serializer = DataSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        if settings.DEBUG:
+            path = 'http://{}:8001/{}'.format(meter.address, meter.port)
+        else:
+            path = 'http://{}:{}'.format(meter.address, meter.port)
+        try:
+            response = requests.get(path)
+        except Exception as e:
+            print('Не удаслоь получить данные:', e)
+        else:
+            serializer = DataSerializer(data=response.json())
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
